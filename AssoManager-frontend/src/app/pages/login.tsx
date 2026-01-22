@@ -1,18 +1,39 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { PublicLayout } from '@/app/components/layouts/public-layout';
 import { Logo } from '@/app/components/logo';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [role, setRole] = useState<'admin' | 'membre'>('membre');
+  const { login, isAuthenticated, user } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (role === 'admin') {
+  // Rediriger si déjà connecté
+  if (isAuthenticated && user) {
+    if (user.role === 'ADMIN') {
       navigate('/admin/dashboard');
     } else {
       navigate('/dashboard');
+    }
+    return null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      await login(email, password);
+      // La redirection sera gérée par l'effet ci-dessus
+    } catch (err: any) {
+      setError(err.message || 'Erreur de connexion');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -27,6 +48,12 @@ export function LoginPage() {
           Connexion
         </h2>
         
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
@@ -35,8 +62,11 @@ export function LoginPage() {
             <input
               type="email"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-              placeholder="exemple@email.com"
+              placeholder="admin@assomanager.com"
+              required
             />
           </div>
           
@@ -47,31 +77,25 @@ export function LoginPage() {
             <input
               type="password"
               id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               placeholder="••••••••"
+              required
             />
           </div>
           
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-              Se connecter en tant que
-            </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value as 'admin' | 'membre')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-            >
-              <option value="membre">Membre</option>
-              <option value="admin">Administrateur</option>
-            </select>
+          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+            <strong>Compte de test :</strong><br />
+            Admin: admin@assomanager.com / admin123
           </div>
           
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium"
+            disabled={loading}
+            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
           >
-            Se connecter
+            {loading ? 'Connexion...' : 'Se connecter'}
           </button>
         </form>
         

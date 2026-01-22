@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from '@/app/contexts/AuthContext';
+import { ProtectedRoute } from '@/app/components/ProtectedRoute';
+import { AdminRoute } from '@/app/components/AdminRoute';
 import { LoginPage } from '@/app/pages/login';
 import { RegisterPage } from '@/app/pages/register';
 import { DashboardMembre } from '@/app/pages/membre/dashboard';
@@ -10,26 +13,52 @@ import { AjouterCotisation } from '@/app/pages/admin/ajouter-cotisation';
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Routes publiques */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        
-        {/* Routes membre */}
-        <Route path="/dashboard" element={<DashboardMembre />} />
-        <Route path="/mes-cotisations" element={<MesCotisations />} />
-        
-        {/* Routes admin */}
-        <Route path="/admin/dashboard" element={<DashboardAdmin />} />
-        <Route path="/admin/membres" element={<ListeMembres />} />
-        <Route path="/admin/membre/:id" element={<DetailMembre />} />
-        <Route path="/admin/ajouter-cotisation" element={<AjouterCotisation />} />
-        
-        {/* Redirection par défaut */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Routes publiques */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          
+          {/* Routes membre protégées */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <DashboardMembre />
+            </ProtectedRoute>
+          } />
+          <Route path="/mes-cotisations" element={
+            <ProtectedRoute>
+              <MesCotisations />
+            </ProtectedRoute>
+          } />
+          
+          {/* Routes admin protégées */}
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <DashboardAdmin />
+            </AdminRoute>
+          } />
+          <Route path="/admin/membres" element={
+            <AdminRoute>
+              <ListeMembres />
+            </AdminRoute>
+          } />
+          <Route path="/admin/membre/:id" element={
+            <AdminRoute>
+              <DetailMembre />
+            </AdminRoute>
+          } />
+          <Route path="/admin/ajouter-cotisation" element={
+            <AdminRoute>
+              <AjouterCotisation />
+            </AdminRoute>
+          } />
+          
+          {/* Redirection par défaut */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }

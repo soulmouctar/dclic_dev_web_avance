@@ -1,10 +1,77 @@
+import { useState, useEffect } from 'react';
 import { PrivateLayout } from '@/app/components/layouts/private-layout';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
+import { contributionService, CreateContributionData } from '../../services/contributionService';
+import { memberService, Member } from '../../services/memberService';
 
 export function AjouterCotisation() {
-  const handleSubmit = (e: React.FormEvent) => {
+  const navigate = useNavigate();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  const [formData, setFormData] = useState({
+    user_id: '',
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    amount: '',
+    payment_date: new Date().toISOString().split('T')[0],
+    payment_method: 'CASH' as 'CASH' | 'TRANSFER' | 'OTHER',
+    reference: ''
+  });
+
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  const loadMembers = async () => {
+    try {
+      const response = await memberService.getMembers('', 1);
+      setMembers(response.members);
+    } catch (err: any) {
+      setError('Erreur lors du chargement des membres');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const contributionData: CreateContributionData = {
+        user_id: parseInt(formData.user_id),
+        year: formData.year,
+        month: formData.month,
+        amount: parseFloat(formData.amount),
+        payment_date: formData.payment_date,
+        payment_method: formData.payment_method,
+        reference: formData.reference || undefined
+      };
+
+      await contributionService.createContribution(contributionData);
+      setSuccess('Cotisation enregistrée avec succès !');
+      
+      // Redirection après 2 secondes
+      setTimeout(() => {
+        navigate('/admin/membres');
+      }, 2000);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Erreur lors de l\'enregistrement de la cotisation');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -25,49 +92,97 @@ export function AjouterCotisation() {
           <p className="text-gray-600 mt-1">Enregistrer une nouvelle cotisation pour un membre</p>
         </div>
         
+        {/* Messages d'erreur et de succès */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+        
+        {success && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+            {success}
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="membre" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="user_id" className="block text-sm font-medium text-gray-700 mb-1">
                   Membre *
                 </label>
                 <select
-                  id="membre"
+                  id="user_id"
+                  name="user_id"
+                  value={formData.user_id}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
                 >
                   <option value="">Sélectionner un membre</option>
-                  <option value="1">Dupont Jean</option>
-                  <option value="2">Martin Marie</option>
-                  <option value="3">Bernard Paul</option>
-                  <option value="4">Dubois Sophie</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.first_name} {member.last_name}
+                    </option>
+                  ))}
                 </select>
               </div>
               
               <div>
-                <label htmlFor="annee" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
                   Année *
                 </label>
+                <input
+                  type="number"
+                  id="year"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleInputChange}
+                  min="2020"
+                  max={new Date().getFullYear() + 1}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
+                  Mois *
+                </label>
                 <select
-                  id="annee"
+                  id="month"
+                  name="month"
+                  value={formData.month}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
                 >
-                  <option value="">Sélectionner une année</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
+                  <option value={1}>Janvier</option>
+                  <option value={2}>Février</option>
+                  <option value={3}>Mars</option>
+                  <option value={4}>Avril</option>
+                  <option value={5}>Mai</option>
+                  <option value={6}>Juin</option>
+                  <option value={7}>Juillet</option>
+                  <option value={8}>Août</option>
+                  <option value={9}>Septembre</option>
+                  <option value={10}>Octobre</option>
+                  <option value={11}>Novembre</option>
+                  <option value={12}>Décembre</option>
                 </select>
               </div>
               
               <div>
-                <label htmlFor="montant" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
                   Montant (€) *
                 </label>
                 <input
                   type="number"
-                  id="montant"
+                  id="amount"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
                   required
                   min="0"
                   step="0.01"
@@ -77,58 +192,51 @@ export function AjouterCotisation() {
               </div>
               
               <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="payment_date" className="block text-sm font-medium text-gray-700 mb-1">
                   Date de paiement *
                 </label>
                 <input
                   type="date"
-                  id="date"
+                  id="payment_date"
+                  name="payment_date"
+                  value={formData.payment_date}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
                 />
               </div>
               
               <div>
-                <label htmlFor="methode" className="block text-sm font-medium text-gray-700 mb-1">
-                  Méthode de paiement
+                <label htmlFor="payment_method" className="block text-sm font-medium text-gray-700 mb-1">
+                  Méthode de paiement *
                 </label>
                 <select
-                  id="methode"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-                >
-                  <option value="">Sélectionner une méthode</option>
-                  <option value="virement">Virement bancaire</option>
-                  <option value="cheque">Chèque</option>
-                  <option value="especes">Espèces</option>
-                  <option value="carte">Carte bancaire</option>
-                </select>
-              </div>
-              
-              <div>
-                <label htmlFor="statut" className="block text-sm font-medium text-gray-700 mb-1">
-                  Statut *
-                </label>
-                <select
-                  id="statut"
+                  id="payment_method"
+                  name="payment_method"
+                  value={formData.payment_method}
+                  onChange={handleInputChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
                 >
-                  <option value="payee">Payée</option>
-                  <option value="en-attente">En attente</option>
-                  <option value="annulee">Annulée</option>
+                  <option value="CASH">Espèces</option>
+                  <option value="TRANSFER">Virement</option>
+                  <option value="OTHER">Autre</option>
                 </select>
               </div>
               
               <div className="md:col-span-2">
-                <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1">
-                  Notes
+                <label htmlFor="reference" className="block text-sm font-medium text-gray-700 mb-1">
+                  Référence
                 </label>
-                <textarea
-                  id="notes"
-                  rows={4}
-                  placeholder="Informations complémentaires..."
+                <input
+                  type="text"
+                  id="reference"
+                  name="reference"
+                  value={formData.reference}
+                  onChange={handleInputChange}
+                  placeholder="Numéro de référence ou notes..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-                ></textarea>
+                />
               </div>
             </div>
             
@@ -141,9 +249,10 @@ export function AjouterCotisation() {
               </Link>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                disabled={loading}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
               >
-                Enregistrer la cotisation
+                {loading ? 'Enregistrement...' : 'Enregistrer la cotisation'}
               </button>
             </div>
           </form>

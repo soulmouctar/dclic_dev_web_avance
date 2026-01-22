@@ -1,18 +1,66 @@
+import { useState, useEffect } from 'react';
 import { PrivateLayout } from '@/app/components/layouts/private-layout';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { Search, Filter, Eye, CheckCircle, XCircle, UserPlus } from 'lucide-react';
+import { memberService, Member, MembersResponse } from '../../services/memberService';
+import { useAuth } from '../../contexts/AuthContext';
 
 export function ListeMembres() {
-  const membres = [
-    { id: 1, nom: 'Dupont', prenom: 'Jean', email: 'jean.dupont@email.com', statut: 'À jour', dateInscription: '15/01/2021' },
-    { id: 2, nom: 'Martin', prenom: 'Marie', email: 'marie.martin@email.com', statut: 'À jour', dateInscription: '20/03/2021' },
-    { id: 3, nom: 'Bernard', prenom: 'Paul', email: 'paul.bernard@email.com', statut: 'En retard', dateInscription: '10/06/2021' },
-    { id: 4, nom: 'Dubois', prenom: 'Sophie', email: 'sophie.dubois@email.com', statut: 'À jour', dateInscription: '05/09/2021' },
-    { id: 5, nom: 'Laurent', prenom: 'Pierre', email: 'pierre.laurent@email.com', statut: 'À jour', dateInscription: '12/11/2021' },
-    { id: 6, nom: 'Simon', prenom: 'Claire', email: 'claire.simon@email.com', statut: 'En retard', dateInscription: '18/01/2022' },
-    { id: 7, nom: 'Michel', prenom: 'Thomas', email: 'thomas.michel@email.com', statut: 'À jour', dateInscription: '25/02/2022' },
-    { id: 8, nom: 'Lefebvre', prenom: 'Julie', email: 'julie.lefebvre@email.com', statut: 'À jour', dateInscription: '30/04/2022' },
-  ];
+  const { user } = useAuth();
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 20,
+    total: 0
+  });
+
+  const loadMembers = async (searchTerm = '', page = 1) => {
+    try {
+      setLoading(true);
+      const response: MembersResponse = await memberService.getMembers(searchTerm, page);
+      setMembers(response.members);
+      setPagination(response.pagination);
+      setError('');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Erreur lors du chargement des membres');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadMembers();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    loadMembers(search, 1);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    loadMembers(search, page);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  const getStatusDisplay = (status: string) => {
+    return status === 'ACTIVE' ? 'Actif' : 'Inactif';
+  };
+
+  const getStatusColor = (status: string) => {
+    return status === 'ACTIVE' 
+      ? 'bg-green-100 text-green-800' 
+      : 'bg-red-100 text-red-800';
+  };
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
@@ -29,21 +77,40 @@ export function ListeMembres() {
         
         {/* Barre de recherche et filtres */}
         <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex gap-4">
+          <form onSubmit={handleSearch} className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher un membre..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               />
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-              <Filter className="w-5 h-5" />
-              Filtrer
+            <button 
+              type="submit"
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            >
+              <Search className="w-5 h-5" />
+              Rechercher
             </button>
-          </div>
+          </form>
         </div>
+
+        {/* Messages d'erreur et de chargement */}
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {error}
+          </div>
+        )}
+
+        {loading && (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Chargement des membres...</p>
+          </div>
+        )}
         
         {/* Tableau des membres */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -72,39 +139,35 @@ export function ListeMembres() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {membres.map((membre) => (
-                  <tr key={membre.id} className="hover:bg-gray-50">
+                {!loading && members.map((member: Member) => (
+                  <tr key={member.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-gray-900">{membre.nom}</span>
+                      <span className="text-sm font-medium text-gray-900">{member.last_name}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{membre.prenom}</span>
+                      <span className="text-sm text-gray-900">{member.first_name}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{membre.email}</span>
+                      <span className="text-sm text-gray-600">{member.email}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                          membre.statut === 'À jour'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-orange-100 text-orange-800'
-                        }`}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(member.status)}`}
                       >
-                        {membre.statut === 'À jour' ? (
+                        {member.status === 'ACTIVE' ? (
                           <CheckCircle className="w-3 h-3" />
                         ) : (
                           <XCircle className="w-3 h-3" />
                         )}
-                        {membre.statut}
+                        {getStatusDisplay(member.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-600">{membre.dateInscription}</span>
+                      <span className="text-sm text-gray-600">{formatDate(member.created_at)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Link
-                        to={`/admin/membre/${membre.id}`}
+                        to={`/admin/membre/${member.id}`}
                         className="inline-flex items-center gap-1 text-green-600 hover:text-green-800"
                       >
                         <Eye className="w-4 h-4" />
@@ -113,25 +176,59 @@ export function ListeMembres() {
                     </td>
                   </tr>
                 ))}
+                {!loading && members.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      Aucun membre trouvé
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
           
           {/* Pagination */}
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <p className="text-sm text-gray-600">Affichage de 1 à 8 sur 156 membres</p>
-            <div className="flex gap-2">
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
-                Précédent
-              </button>
-              <button className="px-3 py-1 bg-green-600 text-white rounded">1</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">2</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">3</button>
-              <button className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50">
-                Suivant
-              </button>
+          {!loading && members.length > 0 && (
+            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Affichage de {((pagination.current_page - 1) * pagination.per_page) + 1} à {Math.min(pagination.current_page * pagination.per_page, pagination.total)} sur {pagination.total} membres
+              </p>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
+                  disabled={pagination.current_page <= 1}
+                  className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Précédent
+                </button>
+                
+                {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                  const page = i + 1;
+                  return (
+                    <button 
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded ${
+                        page === pagination.current_page 
+                          ? 'bg-green-600 text-white' 
+                          : 'border border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+                
+                <button 
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
+                  disabled={pagination.current_page >= pagination.last_page}
+                  className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Suivant
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </PrivateLayout>
