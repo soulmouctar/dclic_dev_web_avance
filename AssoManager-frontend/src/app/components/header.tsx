@@ -1,5 +1,7 @@
 import { LogOut, User } from 'lucide-react';
 import { Logo } from '@/app/components/logo';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   userRole?: 'admin' | 'membre';
@@ -7,6 +9,18 @@ interface HeaderProps {
 }
 
 export function Header({ userRole = 'membre', userName = 'Jean Dupont' }: HeaderProps) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -20,7 +34,10 @@ export function Header({ userRole = 'membre', userName = 'Jean Dupont' }: Header
               {userRole === 'admin' ? 'Admin' : 'Membre'}
             </span>
           </div>
-          <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+          >
             <LogOut className="w-5 h-5" />
             <span className="text-sm">Déconnexion</span>
           </button>

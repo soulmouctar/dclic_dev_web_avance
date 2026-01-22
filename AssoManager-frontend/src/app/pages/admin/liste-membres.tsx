@@ -1,9 +1,31 @@
 import { useState, useEffect } from 'react';
 import { PrivateLayout } from '@/app/components/layouts/private-layout';
 import { Link } from 'react-router-dom';
-import { Search, Filter, Eye, CheckCircle, XCircle, UserPlus } from 'lucide-react';
-import { memberService, Member, MembersResponse } from '../../services/memberService';
+import { Search, Eye, CheckCircle, XCircle, UserPlus, Key } from 'lucide-react';
+import { apiRequest } from '../../config/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { ChangePasswordModal } from '../../components/modals/ChangePasswordModal';
+
+interface Member {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: 'ADMIN' | 'MEMBER';
+  status: 'ACTIVE' | 'INACTIVE';
+  created_at: string;
+  updated_at: string;
+}
+
+interface MembersResponse {
+  members: Member[];
+  pagination: {
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+  };
+}
 
 export function ListeMembres() {
   const { user } = useAuth();
@@ -18,16 +40,40 @@ export function ListeMembres() {
     per_page: 20,
     total: 0
   });
+  const [selectedMemberForPassword, setSelectedMemberForPassword] = useState<Member | null>(null);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const loadMembers = async (searchTerm = '', page = 1) => {
     try {
       setLoading(true);
-      const response: MembersResponse = await memberService.getMembers(searchTerm, page);
-      setMembers(response.members);
-      setPagination(response.pagination);
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        per_page: '20',
+        ...(searchTerm && { search: searchTerm })
+      });
+      
+      const response = await apiRequest(`/members?${params}`);
+      
+      if (response.ok) {
+        const data: MembersResponse = await response.json();
+        setMembers(data.members || []);
+        setPagination(data.pagination || {
+          current_page: 1,
+          last_page: 1,
+          per_page: 20,
+          total: 0
+        });
+      } else {
+        setMembers([]);
+        setError('Erreur lors du chargement des membres');
+      }
+      
       setError('');
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Erreur lors du chargement des membres');
+      setError('Erreur lors du chargement des membres');
+      setMembers([]);
     } finally {
       setLoading(false);
     }
@@ -46,6 +92,21 @@ export function ListeMembres() {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     loadMembers(search, page);
+  };
+
+  const handleChangePassword = (member: Member) => {
+    setSelectedMemberForPassword(member);
+    setIsPasswordModalOpen(true);
+  };
+
+  const handlePasswordChangeSuccess = () => {
+    setSuccessMessage(`Mot de passe de ${selectedMemberForPassword?.first_name} ${selectedMemberForPassword?.last_name} modifié avec succès`);
+    setTimeout(() => setSuccessMessage(''), 5000);
+  };
+
+  const handleClosePasswordModal = () => {
+    setSelectedMemberForPassword(null);
+    setIsPasswordModalOpen(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -70,9 +131,13 @@ export function ListeMembres() {
             <h2 className="text-2xl font-bold text-gray-900">Liste des Membres</h2>
             <p className="text-gray-600 mt-1">Gestion des membres de l'association</p>
           </div>
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            + Nouveau membre
-          </button>
+          <Link
+            to="/admin/ajouter-membre"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            Nouveau membre
+          </Link>
         </div>
         
         {/* Barre de recherche et filtres */}
@@ -111,8 +176,7 @@ export function ListeMembres() {
             <p className="mt-4 text-gray-600">Chargement des membres...</p>
           </div>
         )}
-        
-        {/* Tableau des membres */}
+                {/* Tableau des membres */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -139,6 +203,13 @@ export function ListeMembres() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
+                {!loading && members.length === 0 && !error && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-gray-500">
+                      Aucun membre trouvé
+                    </td>
+                  </tr>
+                )}
                 {!loading && members.map((member: Member) => (
                   <tr key={member.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -166,13 +237,22 @@ export function ListeMembres() {
                       <span className="text-sm text-gray-600">{formatDate(member.created_at)}</span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        to={`/admin/membre/${member.id}`}
-                        className="inline-flex items-center gap-1 text-green-600 hover:text-green-800"
-                      >
-                        <Eye className="w-4 h-4" />
-                        <span className="text-sm">Voir</span>
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link
+                          to={`/admin/membre/${member.id}`}
+                          className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50"
+                          title="Voir le profil"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleChangePassword(member)}
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                          title="Changer le mot de passe"
+                        >
+                          <Key className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -230,6 +310,21 @@ export function ListeMembres() {
             </div>
           )}
         </div>
+
+        {/* Message de succès */}
+        {successMessage && (
+          <div className="fixed top-4 right-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded shadow-lg z-50">
+            <p className="text-sm">{successMessage}</p>
+          </div>
+        )}
+
+        {/* Modal de changement de mot de passe */}
+        <ChangePasswordModal
+          member={selectedMemberForPassword}
+          isOpen={isPasswordModalOpen}
+          onClose={handleClosePasswordModal}
+          onSuccess={handlePasswordChangeSuccess}
+        />
       </div>
     </PrivateLayout>
   );

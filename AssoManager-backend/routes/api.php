@@ -35,11 +35,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('admin')->group(function () {
         // User management
         Route::get('/members', [UserController::class, 'index']);
+        Route::post('/members', [UserController::class, 'store']);
         Route::get('/members/{user}', [UserController::class, 'show']);
         Route::put('/members/{user}', [UserController::class, 'update']);
+        Route::put('/members/{user}/change-password', [UserController::class, 'changePassword']);
         
         // Contribution payments management
         Route::post('/contributions', [ContributionPaymentController::class, 'store']);
         Route::get('/admin/stats', [ContributionPaymentController::class, 'adminStats']);
+        Route::get('/admin/member-payment-stats', [ContributionPaymentController::class, 'memberPaymentStats']);
+        Route::get('/admin/payment-trends', [ContributionPaymentController::class, 'paymentTrends']);
     });
 });

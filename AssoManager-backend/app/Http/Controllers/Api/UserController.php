@@ -70,6 +70,42 @@ class UserController extends Controller
     }
 
     /**
+     * Store a new member (Admin only)
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:ADMIN,MEMBER'
+        ]);
+
+        $user = User::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'role' => $request->role,
+            'status' => 'ACTIVE'
+        ]);
+
+        return response()->json([
+            'message' => 'Membre créé avec succès',
+            'member' => [
+                'id' => $user->id,
+                'first_name' => $user->first_name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
+                'created_at' => $user->created_at,
+            ]
+        ], 201);
+    }
+
+    /**
      * Update member status (Admin only)
      */
     public function update(Request $request, User $user): JsonResponse
@@ -91,6 +127,24 @@ class UserController extends Controller
                 'email' => $user->email,
                 'status' => $user->status,
             ]
+        ]);
+    }
+
+    /**
+     * Change member password (Admin only)
+     */
+    public function changePassword(Request $request, User $user): JsonResponse
+    {
+        $request->validate([
+            'password' => 'required|string|min:6|confirmed'
+        ]);
+
+        $user->update([
+            'password' => bcrypt($request->password)
+        ]);
+
+        return response()->json([
+            'message' => 'Mot de passe mis à jour avec succès'
         ]);
     }
 }

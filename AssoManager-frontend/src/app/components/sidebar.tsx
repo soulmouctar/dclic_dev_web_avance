@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, CreditCard, Plus } from 'lucide-react';
+import { Home, Users, CreditCard, BarChart3, Settings, TrendingUp, List } from 'lucide-react';
 
 interface SidebarProps {
   userRole: 'admin' | 'membre';
@@ -16,7 +16,10 @@ export function Sidebar({ userRole }: SidebarProps) {
   const adminLinks = [
     { path: '/admin/dashboard', icon: Home, label: 'Dashboard' },
     { path: '/admin/membres', icon: Users, label: 'Liste des Membres' },
-    { path: '/admin/ajouter-cotisation', icon: Plus, label: 'Ajouter Cotisation' },
+    { path: '/admin/liste-cotisations', icon: List, label: 'Liste des Cotisations' },
+    { path: '/admin/statistiques', icon: BarChart3, label: 'Statistiques' },
+    { path: '/admin/statistiques-membres', icon: TrendingUp, label: 'Stats par Membre' },
+    { path: '/admin/gestion-utilisateurs', icon: Settings, label: 'Gestion Utilisateurs' },
   ];
   
   const links = userRole === 'admin' ? adminLinks : memberLinks;

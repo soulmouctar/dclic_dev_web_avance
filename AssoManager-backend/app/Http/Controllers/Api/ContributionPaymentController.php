@@ -122,6 +122,8 @@ class ContributionPaymentController extends Controller
         $currentMonth = now()->month;
 
         $totalMembers = User::where('role', 'MEMBER')->count();
+        $activeMembers = User::where('role', 'MEMBER')->where('status', 'ACTIVE')->count();
+        $inactiveMembers = User::where('role', 'MEMBER')->where('status', 'INACTIVE')->count();
         
         $paidThisMonth = ContributionPayment::where('year', $currentYear)
                                           ->where('month', $currentMonth)
@@ -131,13 +133,78 @@ class ContributionPaymentController extends Controller
                                                  ->where('month', $currentMonth)
                                                  ->sum('amount');
 
+        $totalRevenue = ContributionPayment::where('year', $currentYear)->sum('amount');
+        $totalContributions = ContributionPayment::where('year', $currentYear)->count();
+
         return response()->json([
             'total_members' => $totalMembers,
+            'active_members' => $activeMembers,
+            'inactive_members' => $inactiveMembers,
             'paid_this_month' => $paidThisMonth,
             'unpaid_this_month' => $totalMembers - $paidThisMonth,
             'total_amount_this_month' => $totalAmountThisMonth,
+            'total_revenue' => $totalRevenue,
+            'total_contributions' => $totalContributions,
             'current_month' => $currentMonth,
             'current_year' => $currentYear,
+        ]);
+    }
+
+    /**
+     * Get member payment statistics for admin
+     */
+    public function memberPaymentStats(Request $request): JsonResponse
+    {
+        $year = $request->get('year', now()->year);
+        $month = $request->get('month');
+
+        $query = ContributionPayment::with('user')
+            ->where('year', $year);
+
+        if ($month) {
+            $query->where('month', $month);
+        }
+
+        $payments = $query->get();
+
+        $memberStats = $payments->groupBy('user_id')->map(function ($userPayments) {
+            $user = $userPayments->first()->user;
+            return [
+                'member_id' => $user->id,
+                'member_name' => $user->first_name . ' ' . $user->last_name,
+                'total_paid' => $userPayments->sum('amount'),
+                'months_paid' => $userPayments->count(),
+            ];
+        })->values();
+
+        return response()->json([
+            'member_stats' => $memberStats,
+        ]);
+    }
+
+    /**
+     * Get payment trends for admin
+     */
+    public function paymentTrends(Request $request): JsonResponse
+    {
+        $year = $request->get('year', now()->year);
+
+        $trends = ContributionPayment::where('year', $year)
+            ->selectRaw('month, SUM(amount) as total_amount, COUNT(*) as member_count, AVG(amount) as average_per_member')
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get()
+            ->map(function ($trend) {
+                return [
+                    'month' => $trend->month,
+                    'total_amount' => (float) $trend->total_amount,
+                    'member_count' => $trend->member_count,
+                    'average_per_member' => (float) $trend->average_per_member,
+                ];
+            });
+
+        return response()->json([
+            'trends' => $trends,
         ]);
     }
 }

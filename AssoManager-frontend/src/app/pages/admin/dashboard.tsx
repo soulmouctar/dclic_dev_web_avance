@@ -1,13 +1,73 @@
+import { useState, useEffect } from 'react';
 import { PrivateLayout } from '@/app/components/layouts/private-layout';
-import { Users, CreditCard, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, CreditCard, TrendingUp, AlertCircle, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { memberService, AdminStats } from '../../services/memberService';
 
 export function DashboardAdmin() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      const data = await memberService.getAdminStats();
+      setStats(data);
+    } catch (err: any) {
+      setError('Erreur lors du chargement des statistiques');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PrivateLayout userRole="admin" userName="Admin Principal">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-gray-500">Chargement des statistiques...</div>
+        </div>
+      </PrivateLayout>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <PrivateLayout userRole="admin" userName="Admin Principal">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error || 'Erreur lors du chargement des données'}
+        </div>
+      </PrivateLayout>
+    );
+  }
+
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Dashboard Administrateur</h2>
-          <p className="text-gray-600 mt-1">Vue d'ensemble de l'association</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Dashboard Administrateur</h2>
+            <p className="text-gray-600 mt-1">Vue d'ensemble de l'association</p>
+          </div>
+          <div className="flex gap-3">
+            <Link
+              to="/admin/ajouter-membre"
+              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Nouveau membre
+            </Link>
+            <Link
+              to="/admin/ajouter-cotisation"
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              Nouvelle cotisation
+            </Link>
+          </div>
         </div>
         
         {/* Cartes statistiques */}
@@ -16,52 +76,56 @@ export function DashboardAdmin() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Membres</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">156</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_members}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <Users className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <p className="text-xs text-green-600 mt-2">+12 ce mois</p>
+            <p className="text-xs text-green-600 mt-2">+{stats.new_members_this_month || 0} ce mois</p>
           </div>
           
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Membres à jour</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">142</p>
+                <p className="text-sm text-gray-600">Membres actifs</p>
+                <p className="text-3xl font-bold text-green-600 mt-1">{stats.active_members}</p>
               </div>
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <CreditCard className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">91% du total</p>
+            <p className="text-xs text-gray-500 mt-2">
+              {stats.total_members > 0 ? Math.round((stats.active_members / stats.total_members) * 100) : 0}% du total
+            </p>
           </div>
           
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">En retard</p>
-                <p className="text-3xl font-bold text-orange-600 mt-1">14</p>
+                <p className="text-sm text-gray-600">Membres inactifs</p>
+                <p className="text-3xl font-bold text-orange-600 mt-1">{stats.inactive_members}</p>
               </div>
               <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-orange-600" />
               </div>
             </div>
-            <p className="text-xs text-gray-500 mt-2">9% du total</p>
+            <p className="text-xs text-gray-500 mt-2">
+              {stats.total_members > 0 ? Math.round((stats.inactive_members / stats.total_members) * 100) : 0}% du total
+            </p>
           </div>
           
           <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Revenus 2024</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">7 800 €</p>
+                <p className="text-sm text-gray-600">Revenus {new Date().getFullYear()}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_revenue || 0} €</p>
               </div>
               <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                 <TrendingUp className="w-6 h-6 text-gray-600" />
               </div>
             </div>
-            <p className="text-xs text-green-600 mt-2">+15% vs 2023</p>
+            <p className="text-xs text-green-600 mt-2">{stats.total_contributions} cotisations</p>
           </div>
         </div>
         

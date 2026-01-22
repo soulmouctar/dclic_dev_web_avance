@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { PublicLayout } from '@/app/components/layouts/public-layout';
 import { Logo } from '@/app/components/logo';
 
-export function RegisterPage() {
+export function Register() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
   };

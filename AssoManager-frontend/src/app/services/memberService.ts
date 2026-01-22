@@ -1,8 +1,15 @@
 import api from './api';
 import { User } from './authService';
 
-export interface Member extends User {
+export interface Member {
+  id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: 'ADMIN' | 'MEMBER';
+  status: 'ACTIVE' | 'INACTIVE';
   created_at: string;
+  updated_at: string;
 }
 
 export interface ContributionPayment {
@@ -13,6 +20,14 @@ export interface ContributionPayment {
   payment_date: string;
   payment_method: 'CASH' | 'TRANSFER' | 'OTHER';
   reference?: string;
+}
+
+export interface CreateMemberData {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  role: 'ADMIN' | 'MEMBER';
 }
 
 export interface MemberDetail {
@@ -52,6 +67,11 @@ export interface CurrentStatus {
 
 export interface AdminStats {
   total_members: number;
+  active_members: number;
+  inactive_members: number;
+  new_members_this_month: number;
+  total_revenue: number;
+  total_contributions: number;
   paid_this_month: number;
   unpaid_this_month: number;
   total_amount_this_month: number;
@@ -73,6 +93,12 @@ export const memberService = {
   // Admin: Détails d'un membre avec historique des paiements
   async getMemberDetail(memberId: number): Promise<MemberDetail> {
     const response = await api.get(`/members/${memberId}`);
+    return response.data;
+  },
+
+  // Admin: Créer un nouveau membre
+  async createMember(memberData: CreateMemberData): Promise<Member> {
+    const response = await api.post('/members', memberData);
     return response.data;
   },
 
