@@ -97,9 +97,9 @@ export function DetailMembre() {
           </Link>
         </div>
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
               {memberDetail.member.first_name} {memberDetail.member.last_name}
             </h2>
             <p className="text-gray-600 mt-1">Détails du membre</p>
@@ -107,7 +107,7 @@ export function DetailMembre() {
           <button 
             onClick={handleStatusToggle}
             disabled={updating}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-colors w-full sm:w-auto ${
               memberDetail.member.status === 'ACTIVE'
                 ? 'bg-red-600 text-white hover:bg-red-700'
                 : 'bg-green-600 text-white hover:bg-green-700'
@@ -118,14 +118,19 @@ export function DetailMembre() {
             ) : (
               <CheckCircle className="w-4 h-4" />
             )}
-            {updating ? 'Mise à jour...' : (memberDetail.member.status === 'ACTIVE' ? 'Désactiver' : 'Activer')}
+            <span className="hidden sm:inline">
+              {updating ? 'Mise à jour...' : (memberDetail.member.status === 'ACTIVE' ? 'Désactiver' : 'Activer')}
+            </span>
+            <span className="sm:hidden">
+              {updating ? 'Mise à jour...' : (memberDetail.member.status === 'ACTIVE' ? 'Désactiver' : 'Activer')}
+            </span>
           </button>
         </div>
         
         {/* Informations personnelles */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Informations personnelles</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <p className="text-sm text-gray-600">Nom complet</p>
               <p className="text-base font-medium text-gray-900 mt-1">
@@ -172,30 +177,30 @@ export function DetailMembre() {
         
         {/* Historique des cotisations */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <h3 className="text-lg font-semibold text-gray-900">Historique des cotisations</h3>
             <Link
               to="/admin/ajouter-cotisation"
-              className="text-green-600 hover:text-green-800 text-sm font-medium"
+              className="text-green-600 hover:text-green-800 text-sm font-medium text-center sm:text-left"
             >
               + Ajouter une cotisation
             </Link>
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Année
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Montant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                     Date de paiement
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Statut
                   </th>
                 </tr>
@@ -203,26 +208,27 @@ export function DetailMembre() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {memberDetail.payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-gray-900">{payment.year}/{payment.month}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">{payment.amount} €</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                       <span className="text-sm text-gray-600">{formatDate(payment.payment_date)}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                         <CheckCircle className="w-3 h-3" />
-                        {payment.payment_method}
+                        <span className="hidden sm:inline">{payment.payment_method}</span>
+                        <span className="sm:hidden">{payment.payment_method.substring(0, 4)}</span>
                       </span>
                     </td>
                   </tr>
                 ))}
                 {memberDetail.payments.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                    <td colSpan={4} className="px-3 sm:px-6 py-8 text-center text-gray-500">
                       Aucune cotisation enregistrée
                     </td>
                   </tr>

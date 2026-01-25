@@ -136,10 +136,58 @@ class ContributionPaymentController extends Controller
         $totalRevenue = ContributionPayment::where('year', $currentYear)->sum('amount');
         $totalContributions = ContributionPayment::where('year', $currentYear)->count();
 
+        // Calculer les nouveaux membres ce mois
+        $newMembersThisMonth = User::where('role', 'MEMBER')
+                                  ->whereYear('created_at', $currentYear)
+                                  ->whereMonth('created_at', $currentMonth)
+                                  ->count();
+
+        // Récupérer les activités récentes
+        $recentPayments = ContributionPayment::with('user')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $recentMembers = User::where('role', 'MEMBER')
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get();
+
+        $recentActivities = [];
+        
+        // Ajouter les paiements récents
+        foreach ($recentPayments as $payment) {
+            $recentActivities[] = [
+                'type' => 'payment',
+                'title' => 'Nouvelle cotisation',
+                'description' => $payment->user->first_name . ' ' . $payment->user->last_name . ' - ' . $payment->amount . '€',
+                'created_at' => $payment->created_at
+            ];
+        }
+        
+        // Ajouter les nouveaux membres
+        foreach ($recentMembers as $member) {
+            $recentActivities[] = [
+                'type' => 'member',
+                'title' => 'Nouveau membre',
+                'description' => $member->first_name . ' ' . $member->last_name,
+                'created_at' => $member->created_at
+            ];
+        }
+        
+        // Trier par date de création
+        usort($recentActivities, function($a, $b) {
+            return $b['created_at'] <=> $a['created_at'];
+        });
+        
+        // Garder seulement les 5 plus récents
+        $recentActivities = array_slice($recentActivities, 0, 5);
+
         return response()->json([
             'total_members' => $totalMembers,
             'active_members' => $activeMembers,
             'inactive_members' => $inactiveMembers,
+            'new_members_this_month' => $newMembersThisMonth,
             'paid_this_month' => $paidThisMonth,
             'unpaid_this_month' => $totalMembers - $paidThisMonth,
             'total_amount_this_month' => $totalAmountThisMonth,
@@ -147,6 +195,7 @@ class ContributionPaymentController extends Controller
             'total_contributions' => $totalContributions,
             'current_month' => $currentMonth,
             'current_year' => $currentYear,
+            'recent_activities' => $recentActivities,
         ]);
     }
 
@@ -169,11 +218,21 @@ class ContributionPaymentController extends Controller
 
         $memberStats = $payments->groupBy('user_id')->map(function ($userPayments) {
             $user = $userPayments->first()->user;
+            $totalPaid = $userPayments->sum('amount');
+            $monthsPaid = $userPayments->count();
+            $lastPayment = $userPayments->sortByDesc('payment_date')->first();
+            
+            // Déterminer le statut basé sur les paiements récents
+            $isActive = $totalPaid > 0 && $monthsPaid > 0;
+            
             return [
                 'member_id' => $user->id,
                 'member_name' => $user->first_name . ' ' . $user->last_name,
-                'total_paid' => $userPayments->sum('amount'),
-                'months_paid' => $userPayments->count(),
+                'total_paid' => $totalPaid,
+                'months_paid' => $monthsPaid,
+                'last_payment_date' => $lastPayment ? $lastPayment->payment_date->format('Y-m-d') : null,
+                'status' => $isActive ? 'ACTIVE' : 'INACTIVE',
+                'average_monthly' => $monthsPaid > 0 ? round($totalPaid / $monthsPaid, 2) : 0
             ];
         })->values();
 
@@ -205,6 +264,75 @@ class ContributionPaymentController extends Controller
 
         return response()->json([
             'trends' => $trends,
+        ]);
+    }
+
+    public function memberStats(Request $request): JsonResponse
+    {
+        $year = $request->query('year', date('Y'));
+        $status = $request->query('status', 'ALL');
+        $sortBy = $request->query('sortBy', 'total_amount');
+
+        $query = User::where('role', 'MEMBER')
+            ->with(['contributionPayments' => function($q) use ($year) {
+                $q->whereYear('payment_date', $year);
+            }]);
+
+        if ($status !== 'ALL') {
+            $query->where('status', $status);
+        }
+
+        $members = $query->get();
+
+        $memberStats = $members->map(function($member) {
+            $totalAmount = $member->contributionPayments->sum('amount');
+            $totalContributions = $member->contributionPayments->count();
+
+            return [
+                'member_id' => $member->id,
+                'member_name' => $member->first_name . ' ' . $member->last_name,
+                'member_email' => $member->email,
+                'member_status' => $member->status,
+                'total_amount' => (float) $totalAmount,
+                'total_contributions' => $totalContributions,
+                'average_amount' => $totalContributions > 0 ? (float) ($totalAmount / $totalContributions) : 0,
+            ];
+        });
+
+        // Sort the results
+        $memberStats = $memberStats->sortBy($sortBy === 'member_name' ? 'member_name' : $sortBy)->values();
+
+        return response()->json($memberStats);
+    }
+
+    public function contributionTrends(Request $request): JsonResponse
+    {
+        $year = $request->query('year', date('Y'));
+        $type = $request->query('type', 'monthly');
+
+        if ($type === 'yearly') {
+            $trends = ContributionPayment::selectRaw('YEAR(payment_date) as period, COUNT(*) as total_contributions, SUM(amount) as total_amount')
+                ->groupBy('period')
+                ->orderBy('period')
+                ->get();
+        } else {
+            $trends = ContributionPayment::selectRaw('MONTH(payment_date) as period, COUNT(*) as total_contributions, SUM(amount) as total_amount')
+                ->whereYear('payment_date', $year)
+                ->groupBy('period')
+                ->orderBy('period')
+                ->get();
+        }
+
+        $formattedTrends = $trends->map(function($trend) {
+            return [
+                'period' => (int) $trend->period,
+                'total_contributions' => (int) $trend->total_contributions,
+                'total_amount' => (float) $trend->total_amount,
+            ];
+        });
+
+        return response()->json([
+            'trends' => $formattedTrends,
         ]);
     }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PrivateLayout } from '@/app/components/layouts/private-layout';
-import { Users, CreditCard, TrendingUp, AlertCircle, Plus } from 'lucide-react';
+import { CheckCircle, XCircle, DollarSign, Plus, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { memberService, AdminStats } from '../../services/memberService';
 
@@ -46,53 +46,58 @@ export function DashboardAdmin() {
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Dashboard Administrateur</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard Administrateur</h2>
             <p className="text-gray-600 mt-1">Vue d'ensemble de l'association</p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Link
               to="/admin/ajouter-membre"
-              className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center justify-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
-              Nouveau membre
+              <span className="hidden sm:inline">Nouveau membre</span>
+              <span className="sm:hidden">Nouveau membre</span>
             </Link>
             <Link
               to="/admin/ajouter-cotisation"
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto"
             >
               <Plus className="w-4 h-4" />
-              Nouvelle cotisation
+              <span className="hidden sm:inline">Nouvelle cotisation</span>
+              <span className="sm:hidden">Nouvelle</span>
             </Link>
           </div>
         </div>
         
         {/* Cartes statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total Membres</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_members}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Membres</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1">{stats.total_members}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-green-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
             </div>
             <p className="text-xs text-green-600 mt-2">+{stats.new_members_this_month || 0} ce mois</p>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Membres actifs</p>
-                <p className="text-3xl font-bold text-green-600 mt-1">{stats.active_members}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Membres Actifs</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-1">{stats.active_members}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {stats.total_members > 0 ? Math.round((stats.active_members / stats.total_members) * 100) : 0}% du total
+                </p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-green-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2">
@@ -100,14 +105,17 @@ export function DashboardAdmin() {
             </p>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Membres inactifs</p>
-                <p className="text-3xl font-bold text-orange-600 mt-1">{stats.inactive_members}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Membres Inactifs</p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-1">{stats.inactive_members}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {stats.total_members > 0 ? Math.round((stats.inactive_members / stats.total_members) * 100) : 0}% du total
+                </p>
               </div>
-              <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-orange-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
               </div>
             </div>
             <p className="text-xs text-gray-500 mt-2">
@@ -115,78 +123,85 @@ export function DashboardAdmin() {
             </p>
           </div>
           
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Revenus {new Date().getFullYear()}</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_revenue || 0} €</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total Revenus</p>
+                <p className="text-2xl sm:text-3xl font-bold text-blue-600 mt-1">{stats.total_revenue} €</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {stats.total_contributions} cotisations
+                </p>
               </div>
-              <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-gray-600" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
             </div>
             <p className="text-xs text-green-600 mt-2">{stats.total_contributions} cotisations</p>
           </div>
         </div>
         
-        {/* Graphique simplifié */}
-        <div className="bg-white rounded-lg shadow p-6">
+        {/* Graphique avec données réelles */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Évolution des cotisations</h3>
           <div className="h-64 flex items-end gap-4">
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '60%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Jan</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '75%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Fév</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '55%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Mar</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '80%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Avr</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '45%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Mai</span>
-            </div>
-            <div className="flex-1 flex flex-col items-center">
-              <div className="w-full bg-green-600 rounded-t" style={{ height: '90%' }}></div>
-              <span className="text-xs text-gray-600 mt-2">Juin</span>
-            </div>
+            {[
+              { month: 'Jan', amount: stats.current_month === 1 ? stats.total_amount_this_month : 0 },
+              { month: 'Fév', amount: stats.current_month === 2 ? stats.total_amount_this_month : 0 },
+              { month: 'Mar', amount: stats.current_month === 3 ? stats.total_amount_this_month : 0 },
+              { month: 'Avr', amount: stats.current_month === 4 ? stats.total_amount_this_month : 0 },
+              { month: 'Mai', amount: stats.current_month === 5 ? stats.total_amount_this_month : 0 },
+              { month: 'Juin', amount: stats.current_month === 6 ? stats.total_amount_this_month : 0 },
+              { month: 'Juil', amount: stats.current_month === 7 ? stats.total_amount_this_month : 0 },
+              { month: 'Août', amount: stats.current_month === 8 ? stats.total_amount_this_month : 0 },
+              { month: 'Sep', amount: stats.current_month === 9 ? stats.total_amount_this_month : 0 },
+              { month: 'Oct', amount: stats.current_month === 10 ? stats.total_amount_this_month : 0 },
+              { month: 'Nov', amount: stats.current_month === 11 ? stats.total_amount_this_month : 0 },
+              { month: 'Déc', amount: stats.current_month === 12 ? stats.total_amount_this_month : 0 }
+            ].map((data, index) => {
+              const maxAmount = Math.max(stats.total_amount_this_month, 100);
+              const height = data.amount > 0 ? Math.max((data.amount / maxAmount) * 100, 10) : 5;
+              return (
+                <div key={index} className="flex-1 flex flex-col items-center">
+                  <div 
+                    className={`w-full rounded-t ${data.amount > 0 ? 'bg-green-600' : 'bg-gray-200'}`} 
+                    style={{ height: `${height}%` }}
+                    title={`${data.month}: ${data.amount}€`}
+                  ></div>
+                  <span className="text-xs text-gray-600 mt-2">{data.month}</span>
+                </div>
+              );
+            })}
           </div>
         </div>
         
-        {/* Dernières activités */}
-        <div className="bg-white rounded-lg shadow p-6">
+        {/* Activités récentes avec données réelles */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Activités récentes</h3>
           <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Nouvelle cotisation</p>
-                <p className="text-xs text-gray-500">Marie Martin - 50€</p>
+            {stats.recent_activities && stats.recent_activities.length > 0 ? (
+              stats.recent_activities.map((activity, index) => {
+                const timeAgo = new Date(activity.created_at).toLocaleDateString('fr-FR', {
+                  day: 'numeric',
+                  month: 'short',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                });
+                
+                return (
+                  <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{activity.title}</p>
+                      <p className="text-xs text-gray-500">{activity.description}</p>
+                    </div>
+                    <span className="text-xs text-gray-500">{timeAgo}</span>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <p className="text-sm">Aucune activité récente</p>
               </div>
-              <span className="text-xs text-gray-500">Il y a 2h</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Nouveau membre</p>
-                <p className="text-xs text-gray-500">Pierre Dubois</p>
-              </div>
-              <span className="text-xs text-gray-500">Il y a 5h</span>
-            </div>
-            
-            <div className="flex items-center justify-between py-2 border-b border-gray-100">
-              <div>
-                <p className="text-sm font-medium text-gray-900">Cotisation validée</p>
-                <p className="text-xs text-gray-500">Sophie Laurent - 50€</p>
-              </div>
-              <span className="text-xs text-gray-500">Hier</span>
-            </div>
+            )}
           </div>
         </div>
       </div>

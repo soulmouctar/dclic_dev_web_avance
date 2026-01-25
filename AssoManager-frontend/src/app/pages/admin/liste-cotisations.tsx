@@ -155,74 +155,74 @@ export function ListeCotisations() {
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Liste des Cotisations</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Liste des Cotisations</h2>
             <p className="text-gray-600 mt-1">Gestion des paiements de cotisations</p>
           </div>
           <Link
             to="/admin/ajouter-cotisation"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-2"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <DollarSign className="w-4 h-4" />
-            Nouvelle cotisation
+            <span className="hidden sm:inline">Nouvelle cotisation</span>
+            <span className="sm:hidden">Nouvelle</span>
           </Link>
         </div>
 
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-7xl mx-auto">
+          <div className="bg-white rounded-lg shadow p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total cotisations</p>
-                <p className="text-2xl font-bold text-gray-900">{payments.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total cotisations</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{payments.length}</p>
               </div>
-              <Calendar className="w-8 h-8 text-blue-600" />
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Montant total</p>
-                <p className="text-2xl font-bold text-gray-900">{getTotalAmount()} €</p>
+                <p className="text-xs sm:text-sm text-gray-600">Montant total</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{getTotalAmount()} €</p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Année sélectionnée</p>
-                <p className="text-2xl font-bold text-gray-900">{filters.year}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Année sélectionnée</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">{filters.year}</p>
               </div>
-              <Calendar className="w-8 h-8 text-purple-600" />
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-3 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Moyenne par cotisation</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Moyenne par cotisation</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">
                   {payments.length > 0 ? formatAmount(parseFloat(getTotalAmount()) / payments.length) : '0.00'} €
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-orange-600" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
             </div>
           </div>
         </div>
 
         {/* Filtres et recherche */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 max-w-7xl mx-auto overflow-hidden">
           <div className="flex items-center gap-4 mb-4">
-            <Filter className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">Filtres</h3>
           </div>
           
-          <form onSubmit={handleSearch} className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -295,28 +295,28 @@ export function ListeCotisations() {
         {/* Tableau des cotisations */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Membre
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                     Période
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Montant
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Date de paiement
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Méthode
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Référence
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -331,43 +331,46 @@ export function ListeCotisations() {
                 )}
                 {!loading && payments.map((payment) => (
                   <tr key={payment.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <User className="w-5 h-5 text-gray-600" />
+                        <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                          <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                            <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                           </div>
                         </div>
-                        <div className="ml-4">
+                        <div className="ml-2 sm:ml-4">
                           <div className="text-sm font-medium text-gray-900">
                             {payment.user.first_name} {payment.user.last_name}
                           </div>
-                          <div className="text-sm text-gray-500">{payment.user.email}</div>
+                          <div className="text-xs sm:text-sm text-gray-500 sm:block hidden">{payment.user.email}</div>
+                          <div className="text-xs text-gray-500 sm:hidden">
+                            {getMonthName(payment.month)} {payment.year}
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                       <span className="text-sm text-gray-600">
                         {getMonthName(payment.month)} {payment.year}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-gray-900">{formatAmount(payment.amount)} €</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                       <span className="text-sm text-gray-600">{formatDate(payment.payment_date)}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                       <span
                         className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPaymentMethodColor(payment.payment_method)}`}
                       >
                         {payment.payment_method}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                       <span className="text-sm text-gray-600">{payment.reference}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/admin/membre/${payment.user_id}`}
@@ -386,26 +389,32 @@ export function ListeCotisations() {
 
           {/* Pagination */}
           {!loading && payments.length > 0 && (
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
-                Affichage de {((pagination.current_page - 1) * pagination.per_page) + 1} à {Math.min(pagination.current_page * pagination.per_page, pagination.total)} sur {pagination.total} cotisations
+            <div className="px-3 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs sm:text-sm text-gray-600 text-center sm:text-left">
+                <span className="hidden sm:inline">
+                  Affichage de {((pagination.current_page - 1) * pagination.per_page) + 1} à {Math.min(pagination.current_page * pagination.per_page, pagination.total)} sur {pagination.total} cotisations
+                </span>
+                <span className="sm:hidden">
+                  {pagination.current_page} / {pagination.last_page}
+                </span>
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-1 sm:gap-2">
                 <button 
                   onClick={() => handlePageChange(pagination.current_page - 1)}
                   disabled={pagination.current_page <= 1}
-                  className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Précédent
+                  <span className="hidden sm:inline">Précédent</span>
+                  <span className="sm:hidden">‹</span>
                 </button>
                 
-                {Array.from({ length: Math.min(5, pagination.last_page) }, (_, i) => {
+                {Array.from({ length: Math.min(3, pagination.last_page) }, (_, i) => {
                   const page = i + 1;
                   return (
                     <button 
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded ${
+                      className={`px-2 sm:px-3 py-1 text-xs sm:text-sm rounded ${
                         page === pagination.current_page 
                           ? 'bg-green-600 text-white' 
                           : 'border border-gray-300 hover:bg-gray-50'
@@ -419,9 +428,10 @@ export function ListeCotisations() {
                 <button 
                   onClick={() => handlePageChange(pagination.current_page + 1)}
                   disabled={pagination.current_page >= pagination.last_page}
-                  className="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Suivant
+                  <span className="hidden sm:inline">Suivant</span>
+                  <span className="sm:hidden">›</span>
                 </button>
               </div>
             </div>

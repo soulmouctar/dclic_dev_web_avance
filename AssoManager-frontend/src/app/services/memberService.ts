@@ -65,6 +65,13 @@ export interface CurrentStatus {
   };
 }
 
+export interface RecentActivity {
+  type: 'payment' | 'member';
+  title: string;
+  description: string;
+  created_at: string;
+}
+
 export interface AdminStats {
   total_members: number;
   active_members: number;
@@ -77,6 +84,7 @@ export interface AdminStats {
   total_amount_this_month: number;
   current_month: number;
   current_year: number;
+  recent_activities: RecentActivity[];
 }
 
 export const memberService = {

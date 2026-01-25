@@ -83,19 +83,10 @@ export function StatistiquesMembres() {
         trendsData = data.trends || [];
       }
 
-      // Si pas de données API, utiliser des données de fallback
+      // Si pas de données API, ne pas utiliser de données de fallback
+      // Laisser le tableau vide pour forcer l'utilisation des vraies données
       if (memberStatsData.length === 0) {
-        memberStatsData = [
-          {
-            member_id: 1,
-            member_name: 'Aucune donnée',
-            total_contributions: 0,
-            total_amount: 0,
-            last_payment_date: new Date().toISOString(),
-            months_paid: 0,
-            status: 'ACTIVE'
-          }
-        ];
+        console.log('Aucune donnée reçue de l\'API /admin/member-stats');
       }
 
       if (trendsData.length === 0) {
@@ -236,20 +227,22 @@ export function StatistiquesMembres() {
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Statistiques par Membre</h2>
-          <p className="text-gray-600 mt-1">Analyse détaillée des cotisations par membre</p>
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Statistiques par Membre</h2>
+            <p className="text-gray-600 mt-1">Analyse détaillée des cotisations par membre</p>
+          </div>
         </div>
 
         {/* Filtres */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
           <div className="flex items-center gap-4 mb-4">
             <Filter className="w-5 h-5 text-gray-600" />
             <h3 className="text-lg font-semibold text-gray-900">Filtres</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
               <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
                 Année
@@ -300,67 +293,67 @@ export function StatistiquesMembres() {
           </div>
         </div>
 
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        {/* Cartes statistiques */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total membres</p>
-                <p className="text-2xl font-bold text-gray-900">{memberStats.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total membres</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{memberStats.length}</p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Revenus totaux</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Revenus totaux</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.reduce((sum, stat) => sum + stat.total_amount, 0)} €
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Cotisations totales</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Cotisations totales</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.reduce((sum, stat) => sum + stat.total_contributions, 0)}
                 </p>
               </div>
-              <Calendar className="w-8 h-8 text-purple-600" />
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Moyenne par membre</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Moyenne par membre</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.length > 0 ? Math.round(memberStats.reduce((sum, stat) => sum + stat.total_amount, 0) / memberStats.length) : 0} €
                 </p>
               </div>
-              <TrendingUp className="w-8 h-8 text-orange-600" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
             </div>
           </div>
         </div>
 
         {/* Graphiques */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Évolution mensuelle</h3>
-            <div className="h-64">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Évolution mensuelle</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
               <Bar data={getTrendChartData()} options={chartOptions} />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
-            <div className="h-64">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
               <Pie data={getStatusDistribution()} />
             </div>
           </div>
@@ -368,26 +361,26 @@ export function StatistiquesMembres() {
 
         {/* Tableau détaillé */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Détail par membre</h3>
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Détail par membre</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Membre
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell">
                     Cotisations
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Montant total
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Dernier paiement
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Statut
                   </th>
                 </tr>
@@ -395,27 +388,25 @@ export function StatistiquesMembres() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {memberStats.map((stat) => (
                   <tr key={stat.member_id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {stat.member_name}
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-gray-900">{stat.member_name}</span>
+                        <span className="text-xs text-gray-500 sm:hidden">{stat.total_contributions} cotisations</span>
+                        <span className="text-xs text-gray-500 lg:hidden">Actif</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden sm:table-cell">
                       {stat.total_contributions}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {stat.total_amount} €
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">
                       {formatDate(stat.last_payment_date)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          stat.status === 'ACTIVE'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}
-                      >
-                        {stat.status === 'ACTIVE' ? 'Actif' : 'Inactif'}
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                        Actif
                       </span>
                     </td>
                   </tr>

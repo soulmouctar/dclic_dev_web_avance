@@ -102,8 +102,8 @@ export function MesCotisations() {
         )}
         
         {/* Carte de résumé */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <div>
               <p className="text-sm text-gray-600">Total payé</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{contributionsData?.total_paid || 0} €</p>

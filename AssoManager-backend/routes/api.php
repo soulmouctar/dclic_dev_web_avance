@@ -45,5 +45,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/stats', [ContributionPaymentController::class, 'adminStats']);
         Route::get('/admin/member-payment-stats', [ContributionPaymentController::class, 'memberPaymentStats']);
         Route::get('/admin/payment-trends', [ContributionPaymentController::class, 'paymentTrends']);
+        Route::get('/admin/member-stats', [ContributionPaymentController::class, 'memberStats']);
+        Route::get('/admin/contribution-trends', [ContributionPaymentController::class, 'contributionTrends']);
     });
 });

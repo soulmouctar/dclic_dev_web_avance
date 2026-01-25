@@ -91,24 +91,25 @@ export function GestionUtilisateurs() {
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Gestion des Utilisateurs</h2>
             <p className="text-gray-600 mt-1">Administration complète des comptes utilisateurs</p>
           </div>
           <Link
             to="/admin/ajouter-membre"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center gap-2"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-flex items-center justify-center gap-2 w-full sm:w-auto"
           >
             <UserPlus className="w-4 h-4" />
-            Nouvel utilisateur
+            <span className="hidden sm:inline">Nouvel utilisateur</span>
+            <span className="sm:hidden">Nouveau</span>
           </Link>
         </div>
 
         {/* Filtres et recherche */}
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <form onSubmit={handleSearch} className="flex-1 flex gap-4">
+        <div className="bg-white rounded-lg shadow p-4 max-w-7xl mx-auto overflow-hidden">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 flex-1">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -121,17 +122,17 @@ export function GestionUtilisateurs() {
               </div>
               <button
                 type="submit"
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors w-full sm:w-auto"
               >
                 Rechercher
               </button>
             </form>
             
-            <div className="flex gap-2">
+            <div className="w-full sm:w-auto">
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as 'ALL' | 'ADMIN' | 'MEMBER')}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
               >
                 <option value="ALL">Tous les rôles</option>
                 <option value="ADMIN">Administrateurs</option>
@@ -158,25 +159,25 @@ export function GestionUtilisateurs() {
         {/* Tableau des utilisateurs */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Utilisateur
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Email
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
                     Rôle
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Statut
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                     Date d'inscription
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -193,24 +194,27 @@ export function GestionUtilisateurs() {
                   const RoleIcon = getRoleIcon(user.role);
                   return (
                     <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10">
-                            <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              <User className="w-5 h-5 text-gray-600" />
+                          <div className="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10">
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                              <User className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                             </div>
                           </div>
-                          <div className="ml-4">
+                          <div className="ml-2 sm:ml-4">
                             <div className="text-sm font-medium text-gray-900">
                               {user.first_name} {user.last_name}
+                            </div>
+                            <div className="text-xs text-gray-500 md:hidden">
+                              {user.role === 'ADMIN' ? 'Admin' : 'Membre'}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-600">{user.email}</span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                         <span
                           className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}
                         >
@@ -218,18 +222,18 @@ export function GestionUtilisateurs() {
                           {user.role === 'ADMIN' ? 'Administrateur' : 'Membre'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.status)}`}
                         >
                           {user.status === 'ACTIVE' ? 'Actif' : 'Inactif'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">
                         {formatDate(user.created_at)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center gap-2">
+                      <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-1 sm:gap-2">
                           <Link
                             to={`/admin/membre/${user.id}`}
                             className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"

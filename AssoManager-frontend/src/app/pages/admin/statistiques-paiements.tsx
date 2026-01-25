@@ -184,7 +184,22 @@ export function StatistiquesAdmin() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('fr-FR');
+    if (!dateString || dateString === 'Invalid Date') {
+      return 'Aucune date';
+    }
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Date invalide';
+      }
+      return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return 'Date invalide';
+    }
   };
 
   if (loading) {
@@ -209,21 +224,23 @@ export function StatistiquesAdmin() {
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Statistiques de Paiement par Membre</h2>
-          <p className="text-gray-600 mt-1">Analyse détaillée des cotisations et paiements</p>
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Statistiques de Paiement par Membre</h2>
+            <p className="text-gray-600 mt-1">Analyse détaillée des cotisations et paiements</p>
+          </div>
         </div>
 
         {/* Filtres */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
           <div className="flex items-center gap-4 mb-4">
             <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Filtres</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filtres</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative z-50">
               <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
                 Année
               </label>
@@ -231,7 +248,7 @@ export function StatistiquesAdmin() {
                 id="year"
                 value={filters.year}
                 onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 relative z-50"
               >
                 {availableYears.map(year => (
                   <option key={year} value={year}>{year}</option>
@@ -239,7 +256,7 @@ export function StatistiquesAdmin() {
               </select>
             </div>
 
-            <div>
+            <div className="relative z-40">
               <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
                 Mois
               </label>
@@ -247,7 +264,7 @@ export function StatistiquesAdmin() {
                 id="month"
                 value={filters.month}
                 onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 relative z-40"
               >
                 <option value={0}>Tous les mois</option>
                 <option value={1}>Janvier</option>
@@ -265,7 +282,7 @@ export function StatistiquesAdmin() {
               </select>
             </div>
 
-            <div>
+            <div className="relative z-30">
               <label htmlFor="sortBy" className="block text-sm font-medium text-gray-700 mb-1">
                 Trier par
               </label>
@@ -273,7 +290,7 @@ export function StatistiquesAdmin() {
                 id="sortBy"
                 value={filters.sortBy}
                 onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 relative z-30"
               >
                 <option value="total_paid">Montant total</option>
                 <option value="months_paid">Nombre de cotisations</option>
@@ -281,7 +298,7 @@ export function StatistiquesAdmin() {
               </select>
             </div>
 
-            <div>
+            <div className="relative z-20">
               <label htmlFor="viewType" className="block text-sm font-medium text-gray-700 mb-1">
                 Type de vue
               </label>
@@ -289,7 +306,7 @@ export function StatistiquesAdmin() {
                 id="viewType"
                 value={filters.viewType}
                 onChange={(e) => setFilters(prev => ({ ...prev, viewType: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600 relative z-20"
               >
                 <option value="bar">Barres</option>
                 <option value="pie">Camembert</option>
@@ -299,59 +316,59 @@ export function StatistiquesAdmin() {
         </div>
 
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 w-full">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Total membres</p>
-                <p className="text-2xl font-bold text-gray-900">{memberStats.length}</p>
+                <p className="text-xs sm:text-sm text-gray-600">Total membres</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">{memberStats.length}</p>
               </div>
-              <Users className="w-8 h-8 text-blue-600" />
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 w-full">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Revenus totaux</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Revenus totaux</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.reduce((sum, stat) => sum + stat.total_paid, 0)} €
                 </p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 w-full">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Cotisations totales</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Cotisations totales</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.reduce((sum, stat) => sum + stat.months_paid, 0)}
                 </p>
               </div>
-              <Calendar className="w-8 h-8 text-purple-600" />
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 w-full">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">Moyenne par membre</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xs sm:text-sm text-gray-600">Moyenne par membre</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {memberStats.length > 0 ? Math.round(memberStats.reduce((sum, stat) => sum + stat.total_paid, 0) / memberStats.length) : 0} €
                 </p>
               </div>
-              <TrendingUp className="w-8 h-8 text-orange-600" />
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-orange-600" />
             </div>
           </div>
         </div>
 
         {/* Graphiques */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Évolution mensuelle</h3>
-            <div className="h-64">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Évolution mensuelle</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
               {filters.viewType === 'bar' ? (
                 <Bar data={getTrendChartData()} options={chartOptions} />
               ) : (
@@ -360,9 +377,9 @@ export function StatistiquesAdmin() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
-            <div className="h-64">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
               <Pie data={getStatusDistribution()} />
             </div>
           </div>
@@ -370,8 +387,8 @@ export function StatistiquesAdmin() {
 
         {/* Tableau détaillé */}
         <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Détail des paiements par membre</h3>
+          <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Détail des paiements par membre</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">

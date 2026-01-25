@@ -277,199 +277,134 @@ export function StatistiquesAdmin() {
 
   return (
     <PrivateLayout userRole="admin" userName="Admin Principal">
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Statistiques</h2>
-          <p className="text-gray-600 mt-1">Analyse des données de l'association</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Statistiques Générales</h2>
+          <p className="text-gray-600 mt-1">Analyse des cotisations et des membres</p>
+        </div>
+
+        {/* Cartes statistiques */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600">Total Revenus</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                  {data?.yearly_contributions.reduce((sum, y) => sum + y.amount, 0).toLocaleString()} €
+                </p>
+              </div>
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600">Cotisations {filters.year}</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                  {data?.yearly_contributions.find(y => y.year === filters.year)?.count || 0}
+                </p>
+              </div>
+              <Calendar className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600">Membres Actifs</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                  {data?.member_status.find(s => s.status === 'Actif')?.count || 0}
+                </p>
+              </div>
+              <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-600">Méthodes Paiement</p>
+                <p className="text-lg sm:text-2xl font-bold text-gray-900">
+                  {data?.payment_methods.length || 0}
+                </p>
+              </div>
+              <PieChart className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
+            </div>
+          </div>
         </div>
 
         {/* Filtres */}
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
           <div className="flex items-center gap-4 mb-4">
             <Filter className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Filtres</h3>
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Filtres</h3>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label htmlFor="view" className="block text-sm font-medium text-gray-700 mb-1">
-                Vue
-              </label>
-              <select
-                id="view"
-                value={filters.view}
-                onChange={(e) => setFilters(prev => ({ ...prev, view: e.target.value as any }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-              >
-                <option value="monthly">Mensuel</option>
-                <option value="yearly">Annuel</option>
-                <option value="methods">Méthodes de paiement</option>
-                <option value="members">Statut des membres</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <select
+              value={filters.year}
+              onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              {[2024, 2025, 2026].map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
 
-            <div>
-              <label htmlFor="year" className="block text-sm font-medium text-gray-700 mb-1">
-                Année
-              </label>
-              <select
-                id="year"
-                value={filters.year}
-                onChange={(e) => setFilters(prev => ({ ...prev, year: parseInt(e.target.value) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-              >
-                {availableYears.map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={filters.month}
+              onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              <option value={0}>Tous les mois</option>
+              {Array.from({length: 12}, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {new Date(0, i).toLocaleDateString('fr-FR', { month: 'long' })}
+                </option>
+              ))}
+            </select>
 
-            {filters.view === 'monthly' && (
-              <div>
-                <label htmlFor="month" className="block text-sm font-medium text-gray-700 mb-1">
-                  Mois
-                </label>
-                <select
-                  id="month"
-                  value={filters.month}
-                  onChange={(e) => setFilters(prev => ({ ...prev, month: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
-                >
-                  <option value={0}>Toute l'année</option>
-                  <option value={1}>Janvier</option>
-                  <option value={2}>Février</option>
-                  <option value={3}>Mars</option>
-                  <option value={4}>Avril</option>
-                  <option value={5}>Mai</option>
-                  <option value={6}>Juin</option>
-                  <option value={7}>Juillet</option>
-                  <option value={8}>Août</option>
-                  <option value={9}>Septembre</option>
-                  <option value={10}>Octobre</option>
-                  <option value={11}>Novembre</option>
-                  <option value={12}>Décembre</option>
-                </select>
-              </div>
-            )}
-
-            <div className="flex items-end">
-              <button
-                onClick={loadStatistics}
-                className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-              >
-                <TrendingUp className="w-4 h-4" />
-                Actualiser
-              </button>
-            </div>
+            <select
+              value={filters.view}
+              onChange={(e) => setFilters(prev => ({ ...prev, view: e.target.value as any }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-600"
+            >
+              <option value="monthly">Vue mensuelle</option>
+              <option value="yearly">Vue annuelle</option>
+              <option value="methods">Méthodes de paiement</option>
+              <option value="members">Statut des membres</option>
+            </select>
           </div>
         </div>
 
-        {/* Statistiques rapides */}
-        {data && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Total {filters.year}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data.yearly_contributions.find(y => y.year === filters.year)?.amount || 0} €
-                  </p>
-                </div>
-                <BarChart3 className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Cotisations {filters.year}</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data.yearly_contributions.find(y => y.year === filters.year)?.count || 0}
-                  </p>
-                </div>
-                <Calendar className="w-8 h-8 text-blue-600" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Membres actifs</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {data.member_status.find(s => s.status === 'Actif')?.count || 0}
-                  </p>
-                </div>
-                <PieChart className="w-8 h-8 text-purple-600" />
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">Moyenne mensuelle</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    {Math.round((data.yearly_contributions.find(y => y.year === filters.year)?.amount || 0) / 12)} €
-                  </p>
-                </div>
-                <TrendingUp className="w-8 h-8 text-orange-600" />
-              </div>
+        {/* Graphiques */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">{getChartTitle()}</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
+              {renderChart()}
             </div>
           </div>
-        )}
 
-        {/* Graphique principal */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="h-96">
-            {renderChart()}
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 overflow-hidden">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-4">Répartition par statut</h3>
+            <div className="h-48 sm:h-64 w-full overflow-hidden">
+              {data && (
+                <Pie 
+                  data={{
+                    labels: data.member_status.map(s => s.status),
+                    datasets: [{
+                      data: data.member_status.map(s => s.count),
+                      backgroundColor: ['#10B981', '#EF4444', '#F59E0B'],
+                    }]
+                  }}
+                  options={chartOptions}
+                />
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Tableau détaillé */}
-        {data && filters.view === 'monthly' && (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Détail mensuel {filters.year}</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Mois
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Nombre de cotisations
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Montant total
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Moyenne
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {data.monthly_contributions.map((item: MonthlyContribution, index: number) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {item.month}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.count}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.amount} €
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {item.count > 0 ? Math.round(item.amount / item.count) : 0} €
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     </PrivateLayout>
   );
